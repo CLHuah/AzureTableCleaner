@@ -51,8 +51,14 @@ public class Program
             consoleHelper.DisplayError($"Error: {ex.Message}");
         }
 
-        consoleHelper.DisplayInfo("Press any key to exit...");
-        Console.ReadKey();
+        // Console.ReadKey throws when stdin is redirected (common on macOS/Unix
+        // pipelines and in non-interactive hosts), so only wait for a key when
+        // an interactive console is actually attached.
+        if (!Console.IsInputRedirected)
+        {
+            consoleHelper.DisplayInfo("Press any key to exit...");
+            Console.ReadKey();
+        }
     }
 
     private static async Task<DeleteOptions> CollectUserInputs(IConsoleHelper consoleHelper, IInputValidator validator)
@@ -137,10 +143,10 @@ public class Program
         // Get user confirmation
         var confirmation = await consoleHelper.GetUserInputAsync(
             "Are you sure you want to proceed with deletion? (yes/no):",
-            input => input.Equals("yes", StringComparison.CurrentCultureIgnoreCase) ||
-                     input.Equals("no", StringComparison.CurrentCultureIgnoreCase));
+            input => input.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
+                     input.Equals("no", StringComparison.OrdinalIgnoreCase));
 
         // Return true only if user explicitly typed "yes"
-        return confirmation.Equals("yes", StringComparison.CurrentCultureIgnoreCase);
+        return confirmation.Equals("yes", StringComparison.OrdinalIgnoreCase);
     }
 }

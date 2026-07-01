@@ -16,11 +16,31 @@ public class ConsoleHelper : IConsoleHelper
     /// <inheritdoc />
     public void DisplayHeader(string text)
     {
+        var separator = new string('=', GetSafeWidth());
+
         Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine(new string('=', Console.WindowWidth - 1));
-        Console.WriteLine(text.ToUpper());
-        Console.WriteLine(new string('=', Console.WindowWidth - 1));
+        Console.WriteLine(separator);
+        Console.WriteLine(text.ToUpperInvariant());
+        Console.WriteLine(separator);
         Console.ResetColor();
+    }
+
+    /// <summary>
+    ///     Returns a usable console width for drawing separators.
+    ///     On macOS/Unix (and when output is redirected) <see cref="Console.WindowWidth" />
+    ///     can throw or report 0, so fall back to a sensible default.
+    /// </summary>
+    private static int GetSafeWidth()
+    {
+        try
+        {
+            var width = Console.WindowWidth - 1;
+            return width > 0 ? width : 80;
+        }
+        catch (IOException)
+        {
+            return 80;
+        }
     }
 
     /// <inheritdoc />

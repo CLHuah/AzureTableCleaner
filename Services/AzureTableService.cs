@@ -20,8 +20,20 @@ public class AzureTableService(ILogger<AzureTableService> logger) : IAzureTableS
 
         try
         {
-            // Ensure the table exists
-            await client.CreateIfNotExistsAsync();
+            // Verify the table exists. This is a deletion tool, so we must NOT
+            // create the table when it is missing (CreateIfNotExists would mask a
+            // mistyped name and silently report "0 records deleted").
+            var serviceClient = new TableServiceClient(options.ConnectionString);
+            var tableExists = false;
+            await foreach (var _ in serviceClient.QueryAsync(t => t.Name == options.TableName))
+            {
+                tableExists = true;
+                break;
+            }
+
+            if (!tableExists)
+                throw new InvalidOperationException(
+                    $"Table '{options.TableName}' does not exist. No records were deleted.");
 
             // Build the filter string based on options
             var filter = BuildFilterString(options);
@@ -67,11 +79,15 @@ public class AzureTableService(ILogger<AzureTableService> logger) : IAzureTableS
         // If custom filter is provided, use it
         if (!string.IsNullOrEmpty(options.CustomFilter)) return options.CustomFilter;
 
-        // Build filter based on partition key and/or row key
+        // Build filter based on partition key and/or row key.
+        // Use CreateQueryFilter so values are safely escaped/quoted (an apostrophe
+        // in a key would otherwise break the OData expression).
         if (!string.IsNullOrEmpty(options.PartitionKey) && !string.IsNullOrEmpty(options.RowKey))
-            return $"PartitionKey eq '{options.PartitionKey}' and RowKey eq '{options.RowKey}'";
+            return TableClient.CreateQueryFilter(
+                $"PartitionKey eq {options.PartitionKey} and RowKey eq {options.RowKey}");
 
-        if (!string.IsNullOrEmpty(options.PartitionKey)) return $"PartitionKey eq '{options.PartitionKey}'";
+        if (!string.IsNullOrEmpty(options.PartitionKey))
+            return TableClient.CreateQueryFilter($"PartitionKey eq {options.PartitionKey}");
 
         // Default to empty string which will return all entities (dangerous!)
         return string.Empty;
