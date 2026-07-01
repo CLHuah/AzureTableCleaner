@@ -1,6 +1,6 @@
 # Azure Table Cleaner
 
-A .NET 9 console application for bulk deletion of Azure Table Storage records.
+A .NET 10 console application for bulk deletion of Azure Table Storage records.
 
 ## Features
 
@@ -12,7 +12,7 @@ A .NET 9 console application for bulk deletion of Azure Table Storage records.
 
 ## Requirements
 
-- .NET 9 SDK
+- .NET 10 SDK
 - Azure Storage account
 
 ## Usage
@@ -34,9 +34,10 @@ A .NET 9 console application for bulk deletion of Azure Table Storage records.
 
 ## Project Structure
 
-- `Program.cs` - Main entry point and application flow
-- `Models/DeleteOptions.cs` - Data models for deletion options and results
+- `Program.cs` - Composition root: dependency injection wiring and startup
+- `Services/CleanerApplication.cs` - Orchestrates the interactive workflow
 - `Services/AzureTableService.cs` - Azure Table Storage operations
+- `Models/` - Data models (`DeleteOptions`, `DeleteResult`, `FilterType`)
 - `Utils/ConsoleHelper.cs` - Console UI helpers
 - `Utils/InputValidator.cs` - Input validation logic
 

@@ -11,9 +11,9 @@ public class DeleteOptions
     public string ConnectionString { get; set; } = string.Empty;
 
     /// <summary>
-    ///     Optional custom filter expression.
+    ///     Name of the table to delete records from.
     /// </summary>
-    public string? CustomFilter { get; set; }
+    public string TableName { get; set; } = string.Empty;
 
     /// <summary>
     ///     Optional partition key filter.
@@ -26,23 +26,7 @@ public class DeleteOptions
     public string? RowKey { get; set; }
 
     /// <summary>
-    ///     Name of the table to delete records from.
+    ///     Optional custom filter expression.
     /// </summary>
-    public string TableName { get; set; } = string.Empty;
-}
-
-/// <summary>
-///     Result of a delete operation.
-/// </summary>
-public class DeleteResult
-{
-    /// <summary>
-    ///     Number of records successfully deleted.
-    /// </summary>
-    public int DeletedCount { get; set; }
-
-    /// <summary>
-    ///     Number of records that failed to delete.
-    /// </summary>
-    public int FailedCount { get; set; }
+    public string? CustomFilter { get; set; }
 }
